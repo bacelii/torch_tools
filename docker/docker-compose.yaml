@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  jupyter-pytorch:
+    build: .
+    image: jupyter-pytorch:latest
+    ports:
+      - "8892:8888" # Map the Jupyter Notebook port
+    volumes:
+      - ../Applications:/Applications # Mount the current directory into the container
+    environment:
+      - PYTHONUNBUFFERED=1 # Ensure logs appear in real-time
+      - CUDA_VISIBLE_DEVICES=0 # Specify which GPU(s) to use (optional)
+    #runtime: cpu # Enable GPU support for the container (requires NVIDIA Docker)

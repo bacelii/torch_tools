@@ -1,0 +1,47 @@
+
+Goal
+-----
+ To move a word (like mole) that can have very different meanings based on the context (ex: mole amount of a molecule, an animal, a marking on skin) which always starts with the same initial embedding in the encoding space to a more unique vector position based on all the tokens/context around it shifting it to that unique position
+
+General Architecture:
+1) Encoding block (with positional encoding)
+2a) Multi-headed self Attention: where tokens can affect each other
+2b) MLP (relu): where tokens run independently through, doing more automated feature engineering
+2c) Layer Norm
+-- repeat 2
+3) Unencoding block run on the last token only
+
+
+
+Advantages of transformer architectures
+---------------------------------------
+1) attention blocks are mostly (except for the softmax) linear algebra operations (and thus are linear)
+so that when doing multiple attention heads can run them all in parallel (GPU acceleration great)
+
+Observations:
+1) Superposition: Features may be stored in orthogonal vectors, but if vectors are allowed to be not quite 
+orthogonal but nearly close (89 degrees) can fit a lot more orthogonal vectors into a Nd space
+-> it just makes each node harder to interprest because won't individually light up
+-> the number of near orthogonal vectors can fit in ND space is exponential (johnson-lindenstrauss lemma)
+
+Look up: sparse autoencoder
+
+2) Attention blocks just compute a lot of vectors to add to the original vector WITH NO NON-LINEARITY IN THIS OPERATION
+
+Theories: 
+1) Facts can be stored in orthogonal (or almost orthogonal) directions. Then dot product a vector with dimensions to see which facts it match and by how much
+2) When saying that "the network has stored the fact that michael jordan plays basketball" the theory on how it does this is by having a MLP layer that if the input was a vector representing "Michael Jordan" then after passing through the MLP layer, the vector for "basketball" would be added to the original "Michael Jordan" vector, so that if the final vector was dot producted with the basketball dimension unit vector, it woudl be positive
+
+MLP notes (2/3 of the total parameters are here):
+----------
+1) The bias in dandem with the RELU function can help turn dot products into yes or no outputs
+2) The typical MLP layer looks like:
+    - Linear Up (1288 x 34000) + Reul + Linear Down (34000 x 1288)
+    - then output of Linear Down gets added to the original vector (because same size)
+
+Nice way to look at this operation:
+1) the Linear Up can be viewed from row perspective where the input vector dotted with every row
+to find out how much aggreement 
+    Ex: if r0 represented vector "First name Michael, last name Jordan" then a dot product with this would reveal if the vector did have first name Micheal, last name Jordan a0 = dot(v,r0)
+2) The Linear Down can be viewed as linear combination of columns (a0*c0 + a1*c1 ...)
+    So if the network wanted to store the fact that Micheal Jordan was paired with basketball (aka by adding the basketball vector whenever the Micheal Jordan vector was the input), then could have c0 be the basketball vector so that if a0 (which was dot(v,r0)) was positive then c0 would get added to the Linear Down output, which is eventually added back to the input vector
